@@ -1,0 +1,25 @@
+﻿@using AuthenticationApp.Models
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="text-center">
+        <h1 class="display-4">Welcome @(Utils.Base64Decode(@UserManager.GetUserAsync(User).Result.Name))</h1>
+        <p>Your details are as follows:</p>
+        <ul>
+            <li>Gender : @UserManager.GetUserAsync(User).Result.Gender</li>
+            <li>DoB : @UserManager.GetUserAsync(User).Result.DoB.ToLongDateString()</li>
+            <li>Email : @UserManager.GetUserAsync(User).Result.Email</li>
+        </ul>
+    </div>
+}
+else
+{
+    <div class="text-center">
+        <h1 class="display-4">Welcome. Please register or login.</h1>
+    </div>
+}
