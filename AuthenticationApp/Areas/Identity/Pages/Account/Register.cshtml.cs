@@ -31,27 +31,30 @@ namespace AuthenticationApp.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+		private readonly IWebHostEnvironment _hostingEnvironment;
 
-        public RegisterModel(
-            UserManager<ApplicationUser> userManager,
-            IUserStore<ApplicationUser> userStore,
-            SignInManager<ApplicationUser> signInManager,
-            ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
-        {
-            _userManager = userManager;
-            _userStore = userStore;
-            _emailStore = GetEmailStore();
-            _signInManager = signInManager;
-            _logger = logger;
-            _emailSender = emailSender;
-        }
+		public RegisterModel(
+			UserManager<ApplicationUser> userManager,
+			IUserStore<ApplicationUser> userStore,
+			SignInManager<ApplicationUser> signInManager,
+			ILogger<RegisterModel> logger,
+			IEmailSender emailSender,
+			IWebHostEnvironment hostingEnvironment)
+		{
+			_userManager = userManager;
+			_userStore = userStore;
+			_emailStore = GetEmailStore();
+			_signInManager = signInManager;
+			_logger = logger;
+			_emailSender = emailSender;
+			_hostingEnvironment = hostingEnvironment;
+		}
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
-        [BindProperty]
+		/// <summary>
+		///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+		///     directly from your code. This API may change or be removed in future releases.
+		/// </summary>
+		[BindProperty]
         public InputModel Input { get; set; }
 
         /// <summary>
@@ -106,6 +109,14 @@ namespace AuthenticationApp.Areas.Identity.Pages.Account
 			[Display(Name = "Date of Birth")]
 			[DataType(DataType.Date)]
 			public DateTime DOB { get; set; }
+            [Display(Name = "NRIC")]
+            [StringLength(9)]         
+            public string Nric { get; set; }
+            [Display(Name = "Resume")]
+            [FileExtensions("pdf,docx", ErrorMessage = "Invalid file extention")]
+            public IFormFile Resume { get; set; }
+            [Display(Name = "Who Am I")]
+            public string WhoAmI { get; set; }
 		}
 
 
@@ -131,13 +142,37 @@ namespace AuthenticationApp.Areas.Identity.Pages.Account
             }
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser()
+				var filePath = Path.Combine(_hostingEnvironment.WebRootPath, "ResumeFiles");
+                var fileName = string.Empty;
+
+                if (!Directory.Exists(filePath))
+				{
+					Directory.CreateDirectory(filePath);
+				}
+
+				if (Input.Resume != null)
+				{
+					fileName = Path.GetFileName(Input.Resume.FileName);
+					filePath = Path.Combine(filePath, fileName);
+
+
+					await using (Stream fileStream = new FileStream(filePath, FileMode.Create))
+					{
+						await Input.Resume.CopyToAsync(fileStream);
+					}
+				}
+
+				var user = new ApplicationUser()
                 {
                     Name = Utils.Base64Encode(Input.Name),
                     Email = Input.Email,
                     Gender = Input.Gender,
                     DoB = Input.DOB,
-                };
+                    Nric = Utils.Base64Encode(Input.Nric),
+                    ResumePath = fileName,
+                    WhoAmI = Input.WhoAmI
+
+				};
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);

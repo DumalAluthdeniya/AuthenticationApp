@@ -1,6 +1,7 @@
 ﻿using EntityFrameworkCore.EncryptColumn.Attribute;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AuthenticationApp.Models
 {
@@ -13,5 +14,10 @@ namespace AuthenticationApp.Models
         public Gender Gender { get; set; }
         [Required]
         public DateTime DoB { get; set; }
+        [Required]
+        public string? Nric { get; set; }     
+        public string? ResumePath { get; set; }
+        [Required]
+        public string? WhoAmI { get; set; }
     }
 }

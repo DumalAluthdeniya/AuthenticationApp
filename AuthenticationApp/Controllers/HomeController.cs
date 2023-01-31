@@ -2,6 +2,7 @@
 using AuthenticationApp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Net;
@@ -36,54 +37,20 @@ namespace AuthenticationApp.Controllers
 		{
 			return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 		}
-		//[HttpPost]
-		//public ActionResult ValidateCaptcha()
-		//{
-		//	var response = Request["g-recaptcha-response"];
-		//	//secret that was generated in key value pair
-		//	const string secret = "YOUR KEY VALUE PAIR";
+        public IActionResult ViewResource(string resourcePath)
+        {
+            var fileProvider = new FileExtensionContentTypeProvider();
+            // Figures out what the content type should be based on the file name.
+            if (!fileProvider.TryGetContentType(resourcePath, out string contentType))
+            {
+                throw new ArgumentOutOfRangeException($"Unable to find Content Type for file name {resourcePath}.");
+            }
 
-		//	var client = new WebClient();
-		//	var reply =
-		//		client.DownloadString(
-		//			string.Format("https://www.google.com/recaptcha/api/siteverify?secret={0}&response={1}",
-		//		secret, response));
 
-		//	var captchaResponse = JsonConvert.DeserializeObject<ReCaptchaResponse>(reply);
+            resourcePath = "/ResumeFiles/" + resourcePath;
 
-		//	//when response is false check for the error message
-		//	if (!captchaResponse.Success)
-		//	{
-		//		if (captchaResponse.ErrorCodes.Count <= 0) return View();
 
-		//		var error = captchaResponse.ErrorCodes[0].ToLower();
-		//		switch (error)
-		//		{
-		//			case ("missing-input-secret"):
-		//				ViewBag.Message = "The secret parameter is missing.";
-		//				break;
-		//			case ("invalid-input-secret"):
-		//				ViewBag.Message = "The secret parameter is invalid or malformed.";
-		//				break;
-
-		//			case ("missing-input-response"):
-		//				ViewBag.Message = "The response parameter is missing.";
-		//				break;
-		//			case ("invalid-input-response"):
-		//				ViewBag.Message = "The response parameter is invalid or malformed.";
-		//				break;
-
-		//			default:
-		//				ViewBag.Message = "Error occured. Please try again";
-		//				break;
-		//		}
-		//	}
-		//	else
-		//	{
-		//		ViewBag.Message = "Valid";
-		//	}
-
-		//	return View();
-		//}
-	}
+            return File(resourcePath, contentType);
+        }
+    }
 }

@@ -14,6 +14,10 @@
             <li>Gender : @UserManager.GetUserAsync(User).Result.Gender</li>
             <li>DoB : @UserManager.GetUserAsync(User).Result.DoB.ToLongDateString()</li>
             <li>Email : @UserManager.GetUserAsync(User).Result.Email</li>
+            <li>NRIC : @(Utils.Base64Decode(@UserManager.GetUserAsync(User).Result.Nric))</li>
+            <li>Resume : <a class="download" asp-action="ViewResource" asp-controller="Home" asp-route-resourcePath="@UserManager.GetUserAsync(User).Result.ResumePath" target="_blank" title="Click to view file">@UserManager.GetUserAsync(User).Result.ResumePath</a></li>
+            <li>Who Am I : @UserManager.GetUserAsync(User).Result.WhoAmI</li>
+
         </ul>
     </div>
 }
